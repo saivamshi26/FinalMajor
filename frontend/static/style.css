@@ -1,0 +1,74 @@
+body {
+  font-family: Segoe UI, Arial, sans-serif;
+  margin: 24px;
+  background: #0f1419;
+  color: #e7ecf3;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  background: #161f2c;
+  border: 1px solid #2d3a4f;
+  border-radius: 12px;
+  padding: 22px;
+}
+
+h2 {
+  margin: 0 0 16px 0;
+}
+
+form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+input[type="file"] {
+  flex: 1;
+  color: #e7ecf3;
+}
+
+button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #3d8bfd;
+  color: #fff;
+  font-weight: 600;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.card {
+  border: 1px solid #2d3a4f;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 12px;
+}
+
+#status {
+  margin-top: 10px;
+  color: #8b9bb4;
+  min-height: 18px;
+}
+
+#result {
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 12px;
+  border-radius: 10px;
+  min-height: 50px;
+  margin: 0;
+  background: rgba(0,0,0,0.15);
+}
+

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SimpleHTR</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="wrap">
+    <h2>SimpleHTR</h2>
+
+    <form id="form">
+      <input type="file" id="image" name="image" accept="image/*" />
+      <button type="submit" id="run-btn">RUN</button>
+    </form>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Output</h3>
+      <pre id="result"></pre>
+      <div id="status"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("form");
+    const image = document.getElementById("image");
+    const result = document.getElementById("result");
+    const status = document.getElementById("status");
+    const runBtn = document.getElementById("run-btn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!image.files || !image.files[0]) {
+        status.textContent = "Choose an image first.";
+        return;
+      }
+
+      status.textContent = "Running...";
+      result.textContent = "";
+      runBtn.disabled = true;
+
+      const fd = new FormData();
+      fd.append("image", image.files[0]);
+
+      try {
+        const r = await fetch("/run", { method: "POST", body: fd });
+        const data = await r.json();
+        if (data.ok) {
+          status.textContent = "";
+          result.textContent = data.text;
+        } else {
+          status.textContent = data.error || "Request failed.";
+        }
+      } catch (err) {
+        status.textContent = err.message || "Network error.";
+      } finally {
+        runBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
+

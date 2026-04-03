@@ -27,3 +27,6 @@ Thumbs.db
 # Logs / env
 *.log
 .env
+
+# Frontend uploads (user selected images)
+frontend/uploads/
