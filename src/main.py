@@ -231,6 +231,7 @@ from spellchecker import SpellChecker
 from dataloader_iam import DataLoaderIAM, Batch
 from model import Model, DecoderType
 from preprocessor import Preprocessor
+from sentence_infer import full_image_predict, full_image_predict_consensus
 
 
 class FilePaths:
@@ -375,6 +376,23 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--img_file', help='Image used for inference.', type=Path, default='../data/test.png')
     parser.add_argument('--early_stopping', help='Early stopping epochs.', type=int, default=25)
     parser.add_argument('--dump', help='Dump output of NN to CSV file(s).', action='store_true')
+    parser.add_argument(
+        '--segmentation',
+        choices=['word', 'line'],
+        default='word',
+        help='word: contour segments + spell check (default). line: horizontal lines like sentence_infer.py.',
+    )
+    parser.add_argument(
+        '--line_runs',
+        type=int,
+        default=10,
+        help='For --segmentation line: run full inference this many times and take majority-vote text. Use 1 for a single fast run.',
+    )
+    parser.add_argument(
+        '--no_line_spell',
+        action='store_true',
+        help='For --segmentation line: disable English spell correction on recognized text (keeps raw OCR).',
+    )
 
     return parser.parse_args()
 
@@ -389,7 +407,30 @@ def main():
 
     if args.mode == 'infer':
         model = Model(char_list_from_file(), decoder_type, must_restore=True, dump=args.dump)
-        infer(model, args.img_file)
+        if args.segmentation == 'line':
+            if args.line_runs < 1:
+                print("ERROR: --line_runs must be >= 1")
+                return
+            print(f"\nLine segmentation (sentence_infer pipeline): {args.img_file}\n")
+            spell_check = not args.no_line_spell
+            if args.line_runs == 1:
+                text = full_image_predict(
+                    model, str(args.img_file), spell_check=spell_check
+                )
+            else:
+                text, vote_counts = full_image_predict_consensus(
+                    model, str(args.img_file), args.line_runs, spell_check=spell_check
+                )
+                print(f"Majority over {args.line_runs} runs (counts per distinct output):")
+                for s, c in sorted(vote_counts.items(), key=lambda x: (-x[1], x[0])):
+                    preview = (s[:80] + "...") if len(s) > 80 else s
+                    print(f"  x{c}: {repr(preview)}")
+                print()
+            print("FINAL OUTPUT:\n")
+            print(text if text else "(empty)")
+            print()
+        else:
+            infer(model, args.img_file)
     else:
         print("For training, please revert to the original script.")
 
